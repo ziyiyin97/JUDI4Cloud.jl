@@ -98,3 +98,5 @@ fjn, gjn = lsrtm_objective(model0, q, dobs, dm; nlind=true, options=opt)
 # OMP_NUM_THREAS=1 (no parllelism) produces the exact (difference == 0) same result
 # gjn2 == g
 fjn2, gjn2 = lsrtm_objective(model0, q, dobs, 0f0.*dm; nlind=true, options=opt)
+
+fjn2, gjn2 = lsrtm_objective([model, model0], [q, 2*q], [dobs, 3*dobs], [0f0.*dm, dm]; nlind=true, options=opt)

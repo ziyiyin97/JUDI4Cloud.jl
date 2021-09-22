@@ -45,11 +45,10 @@ function JUDI.lsrtm_objective(model::Model, source::judiVector, dObs::judiVector
     # lsrtm_objective function for multiple sources. The function distributes the sources and the input data amongst the available workers.
 
     # Broadcast common parameters
-    _model = @bcast model
     _dm = isnothing(dm) ? dm : @bcast dm
     opts = make_opt([model, dObs, source, dm])
     iter = make_parts(1:dObs.nsrc)
-    results = @batchexec pmap(j -> lsrtm_objective_azure(_model, source[j], dObs[j], _dm, subsample(options, j); nlind=nlind), iter) opts
+    results = @batchexec pmap(j -> lsrtm_objective_azure(model, source[j], dObs[j], _dm, subsample(options, j); nlind=nlind), iter) opts
     # Collect and reduce gradients
     obj, gradient = fetchreduce(results; op=+, remote=true)
     # first value corresponds to function value, the rest to the gradient
