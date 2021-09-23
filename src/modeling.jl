@@ -49,9 +49,8 @@ function JUDI.lsrtm_objective(model::Model, source::judiVector, dObs::judiVector
     iter = make_parts(1:dObs.nsrc)
     results = @batchexec pmap(j -> lsrtm_objective_azure(model, source[j], dObs[j], dm, subsample(options, j); nlind=nlind), iter) opts
     # Collect and reduce gradients
-    results1 = fetch(results)
-    obj, gradient = results1
-
+    obj, gradient = fetchreduce(results; op=+, remote=true)
+    
     # first value corresponds to function value, the rest to the gradient
     return obj, gradient
 end
