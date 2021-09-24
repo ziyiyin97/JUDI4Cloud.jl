@@ -25,8 +25,10 @@ end
 end
 
 #LSRTM
-@batchdef function lsrtm_objective_azure(model, q, D, dm, opt; nlind=false)
+@batchdef function lsrtm_objective_azure(_model::BatchFuture, q, D, _dm, opt; nlind=false)
     check_njulia(q.nsrc)
+    model = fetch(_model)
+    dm = isnothing(_dm) ? _dm : fetch(_dm)
     f, g = lsrtm_objective(model,q, D, dm; options=opt, nlind=nlind)
     rmprocs(workers())
     return f, g
