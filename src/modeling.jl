@@ -62,19 +62,24 @@ function JUDI.lsrtm_objective(model::Array{Model,1}, source::Array{judiVector{T,
 # lsrtm_objective function for multiple sources and multiple vintages. The function distributes the sources and the input data amongst the available workers.
 
     println("serial lsrtm_objective on each vintage now")
-
     ctrl = Array{Any, 1}(undef, length(dObs))
+    obj = Array{T, 1}(undef, length(dObs))
+    gradient = Array{Array{T,2}, 1}(undef, length(dObs))
 
     for i = 1:length(dObs)
         _model = model[i]
         _source = source[i]
         _dObs = dObs[i]
         _dm = dm[i]
-        ctrl[i] = @batchexec pmap(j -> lsrtm_objective_azure(_model, _source[j], _dObs[j], _dm, subsample(options, j); nlind=nlind), 1:length(dObs)) opts
+        _model1 = @bcast _model
+        _dm1 = @bcast _dm
+        opts = make_opt([_model, dObs, source, _dm])
+        ctrl[i] = @batchexec pmap(j -> lsrtm_objective_azure(_model1, _source[j], _dObs[j], _dm1, subsample(options, j); nlind=nlind), 1:dObs[i].nsrc) opts
     end
     for i = 1:length(dObs)
         results = fetch(ctrl[i])
-        obj[i], gradient[j] = results
+        obj[i] = sum([results[j][1] for j =  1:dObs[i].nsrc])
+        gradient[i] = sum([results[j][2] for j = 1:dObs[i].nsrc])
     end
 
     obj1 = sum(obj)
