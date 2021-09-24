@@ -50,10 +50,27 @@ function JUDI.lsrtm_objective(model::Model, source::judiVector, dObs::judiVector
     results = @batchexec pmap(j -> lsrtm_objective_azure(model, source[j], dObs[j], dm, subsample(options, j); nlind=nlind), iter) opts
     # Collect and reduce gradients
     obj, gradient = fetchreduce(results; op=+, remote=true)
-    
+
     # first value corresponds to function value, the rest to the gradient
     return obj, gradient
 end
+
+function JUDI.lsrtm_objective(model::Array{Model,1}, source::Array{judiVector{T,Array{T,2}},1}, dObs::Array{judiVector{T,Array{T,2}},1}, dm::Union{Array{Array{T,1},1}, Array{PhysicalParameter{T},1}}; options=Options(), nlind=false) where T
+# lsrtm_objective function for multiple sources and multiple vintages. The function distributes the sources and the input data amongst the available workers.
+
+    obj = Array{T, 1}(undef, length(dObs))
+    gradient = Array{Array{T,2}, 1}(undef, length(dObs))
+
+    for i = 1:length(dObs)
+        obj[i], gradient[i] = lsrtm_objective(model[i], source[i], dObs[i], dm[i]; options=options, nlind=nlind)
+    end
+
+    obj1 = sum(obj)
+
+    # first value corresponds to function value, the rest to the gradient
+    return obj1, gradient
+end
+
 
 
 # Make options for unique batch ids
