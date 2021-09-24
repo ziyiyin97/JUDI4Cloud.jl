@@ -61,6 +61,7 @@ end
 function JUDI.lsrtm_objective(model::Array{Model,1}, source::Array{judiVector{T,Array{T,2}},1}, dObs::Array{judiVector{T,Array{T,2}},1}, dm::Union{Array{Array{T,1},1}, Array{PhysicalParameter{T},1}}; options=Options(), nlind=false) where T
 # lsrtm_objective function for multiple sources and multiple vintages. The function distributes the sources and the input data amongst the available workers.
 
+    println("serial lsrtm_objective on each vintage now")
     obj = Array{T, 1}(undef, length(dObs))
     gradient = Array{Array{T,2}, 1}(undef, length(dObs))
 
