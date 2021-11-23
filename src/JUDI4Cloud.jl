@@ -5,7 +5,7 @@ import Base.+
 using AzureClusterlessHPC, Reexport
 @reexport using JUDI
 
-export init_culsterless
+export init_culsterless, finalize_culsterless
 
 _njpi = 1
 _default_container = "mloubout/judi-cpu:1.4.3"

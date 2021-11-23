@@ -59,7 +59,6 @@ function JUDI.lsrtm_objective(model::Model, source::judiVector, dObs::judiVector
     return obj, gradient
 end
 
-#=
 function JUDI.lsrtm_objective(model::Array{Model,1}, source::Array{judiVector{T,Array{T,2}},1}, dObs::Array{judiVector{T,Array{T,2}},1}, dm::Union{Array{Array{T,1},1}, Array{PhysicalParameter{T},1}}; options=Options(), nlind=false) where T
 # lsrtm_objective function for multiple sources and multiple vintages. The function distributes the sources and the input data amongst the available workers.
 
@@ -80,6 +79,7 @@ function JUDI.lsrtm_objective(model::Array{Model,1}, source::Array{judiVector{T,
     end
     for i = 1:length(dObs)
         results = fetch(ctrl[i])
+        delete_job(ctrl[i])
         obj[i] = sum([results[j][1] for j =  1:dObs[i].nsrc])
         gradient[i] = sum([results[j][2] for j = 1:dObs[i].nsrc])
     end
@@ -89,8 +89,6 @@ function JUDI.lsrtm_objective(model::Array{Model,1}, source::Array{judiVector{T,
     # first value corresponds to function value, the rest to the gradient
     return obj1, gradient
 end
-=#
-
 
 # Make options for unique batch ids
 make_opt(a::Array) = AzureClusterlessHPC.Options(;task_name="task_$(objectid(a))")
